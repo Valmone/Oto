@@ -53,6 +53,25 @@ function simulation() {
 	//-------------------------------------------------------------------------//
 	//--------------------------------Fonctions--------------------------------//
 	//-------------------------------------------------------------------------//
+	/*function result_final() {
+		var attaquant_result = new Array(),
+			defenseur_result = new Array();
+		if ((total_attak_tour === 0) && (attaquant_tour[0] === undefined))
+			{var result = "attaquant_tout_perdu";}
+		else {
+				for (var i = 0; i < total_attak_tour; i++) {
+					
+				}
+		}
+		
+
+		if ((total_def_tour === 0) && (defenseur_tour[0] === undefined))
+			{var result = "defenseur_tout_perdu";}
+		else {}
+
+	}*/
+
+
 	function verif(result) {		//on vérifie les champs vide du simulateur
 		if (result === "")
 			{var value = 0;}
@@ -74,6 +93,7 @@ function simulation() {
 						attaquant[i][2] = bouclier;			//bouclier
 						attaquant[i][3] = protection;		//protection
 						attaquant[i][4] = bouclier;			//bouclier => valeur initial
+						attaquant[i][5] = protection;		//protection => valeur initial
 					}
 				total_attak = total_attak + fleet;
 			}
@@ -87,6 +107,7 @@ function simulation() {
 						defenseur[i][2] = bouclier;			//bouclier
 						defenseur[i][3] = protection;		//protection
 						defenseur[i][4] = bouclier;			//bouclier => valeur initial
+						defenseur[i][5] = protection;		//protection => valeur initial
 					}
 				total_def = total_def + fleet;
 			}
@@ -99,7 +120,7 @@ function simulation() {
 				if (attaquant_tour[id_victimiseur][1] < (defenseur_tour[id_victime][2]/100))			//si il est trop faible pour attaquer le bouclier
 					{degat_a_venir = 0;}
 				else {
-					if (attaquant_tour[id_victimiseur][1] < (defenseur_tour[id_victime][2]/100))		//si il peut attaquer le bouclier mais pas la coque
+					if (attaquant_tour[id_victimiseur][1] < (defenseur_tour[id_victime][2]))		//si il peut attaquer le bouclier mais pas la coque
 						{
 							defenseur_tour[id_victime][2] = defenseur_tour[id_victime][2] - attaquant_tour[id_victimiseur][1];
 							degat_a_venir = 0;
@@ -114,7 +135,7 @@ function simulation() {
 				if (defenseur_tour[id_victimiseur][1] < (attaquant_tour[id_victime][2]/100))			//si il est trop faible pour attaquer le bouclier
 					{degat_a_venir = 0;}
 				else {
-					if (defenseur_tour[id_victimiseur][1] < (attaquant_tour[id_victime][2]/100))		//si il peut attaquer le bouclier mais pas la coque
+					if (defenseur_tour[id_victimiseur][1] < (attaquant_tour[id_victime][2]))		//si il peut attaquer le bouclier mais pas la coque
 						{
 							attaquant_tour[id_victime][2] = attaquant_tour[id_victime][2] - defenseur_tour[id_victimiseur][1];
 							degat_a_venir = 0;
@@ -148,17 +169,23 @@ function simulation() {
 	function proba_destruction(id, a_qui_le_tour) {
 		if (a_qui_le_tour === "attaquant")
 			{
-				if ((defenseur_tour[id][3] *10) < (defenseur_tour[id][4] *7))
+				var protection_70pourcent = defenseur_tour[id][5] *0.7,
+					pourcent_endommagement_coque = defenseur_tour[id][3] *100;
+				pourcent_endommagement_coque = pourcent_endommagement_coque /defenseur_tour[id][5];
+				if (defenseur_tour[id][3] < protection_70pourcent)
 					{
-						if (Math.floor(Math.random() * defenseur_tour[id][4]) > defenseur_tour[id][3])
+						if (Math.floor(Math.random() *100) < pourcent_endommagement_coque)
 							{defenseur_tour[id][3] = -1;}
 						else {}
 					}
 			}
 		else {
-				if ((attaquant_tour[id][3] *10) < (attaquant_tour[id][4] *7))
+				var protection_70pourcent = attaquant_tour[id][5] *0.7,
+					pourcent_endommagement_coque = attaquant_tour[id][3] *100;
+				pourcent_endommagement_coque = pourcent_endommagement_coque /attaquant_tour[id][5];
+				if (attaquant_tour[id][3] < protection_70pourcent)
 					{
-						if (Math.floor(Math.random() * attaquant_tour[id][4]) > attaquant_tour[id][3])
+						if (Math.floor(Math.random() *100) < pourcent_endommagement_coque)
 							{attaquant_tour[id][3] = -1;}
 						else {}
 					}
@@ -192,8 +219,6 @@ function simulation() {
 				else {}
 		        				
 		}
-		console.log(rnd, RF);
-		
 	}
 
 	function del_vaisso_detruit() {				//suppression des vaisseaux detruit
@@ -201,10 +226,7 @@ function simulation() {
 			{
 				if (attaquant_tour[i][3] === -1)
 					{
-						for (o = i; o < (total_attak_tour-1); o++)
-							{
-								attaquant_tour[o] = attaquant_tour[o+1];
-							}
+						attaquant_tour.splice(i, 1);
 						total_attak_tour--;
 					}
 				else {}
@@ -213,10 +235,7 @@ function simulation() {
 			{
 				if (defenseur_tour[i][3] === -1)
 					{
-						for (o = i; o < (total_def_tour-1); o++)
-							{
-								defenseur_tour[o] = defenseur_tour[o+1];
-							}
+						defenseur_tour.splice(i, 1);
 						total_def_tour--;
 					}
 				else {}
@@ -345,9 +364,10 @@ function simulation() {
 		defenseur_tour = defenseur;
 		total_attak_tour = total_attak;
 		total_def_tour = total_def;
-
+console.log(attaquant_tour);
 		do {			//les 6 tours maximums
 			tours++;
+			console.log("attaquant");
 			for (var id_VaisseauTireur = 0; id_VaisseauTireur < total_attak_tour; id_VaisseauTireur++)		//c'est le tour de l'attaquant
 				{
 					rapidfire = false;
@@ -359,11 +379,13 @@ function simulation() {
 								destruction_bouclier(id_VaisseauTireur, id_VaisseauCible, "attaquant");
 								degat_a_faire(id_VaisseauTireur, id_VaisseauCible, "attaquant");
 								rapidfire_ou_pas(id_VaisseauTireur, id_VaisseauCible, "attaquant");
+								proba_destruction(id_VaisseauCible, "attaquant");
 							}
 						else {}
 					} while((rapidfire) && (nbr_rapidfire < 1000));	//en cas de rapidfire on recommence					
 				}
 
+			console.log("defenseur");
 			for (var id_VaisseauTireur = 0; id_VaisseauTireur < total_def_tour; id_VaisseauTireur++)		//c'est le tour du defenseur
 				{
 					rapidfire = false;
@@ -375,6 +397,7 @@ function simulation() {
 								destruction_bouclier(id_VaisseauTireur, id_VaisseauCible, "defenseur");
 								degat_a_faire(id_VaisseauTireur, id_VaisseauCible, "defenseur");
 								rapidfire_ou_pas(id_VaisseauTireur, id_VaisseauCible, "defenseur");
+								proba_destruction(id_VaisseauCible, "defenseur");
 							}
 						else {}
 					} while((rapidfire) && (nbr_rapidfire < 1000));	//en cas de rapidfire on recommence					
@@ -393,7 +416,7 @@ function simulation() {
 	//} while(nbr_simulation < 10);
 
 	console.log("Nombre de tours: "+tours+"\n"+ total_attak_tour, total_def_tour);
-	console.log(attaquant_tour, defenseur_tour);
+	//console.log(attaquant_tour, defenseur_tour);
 
 
 
