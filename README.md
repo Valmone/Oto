@@ -8,4 +8,8 @@ Code du simulateur comprenant le Javascript
 Uniquement le code javascript
 
 
-Désolé d'avance pour le nom des variables x)
+
+
+
+
+*Désolé d'avance pour le nom des variables x)*
