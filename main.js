@@ -226,11 +226,11 @@ function simulation() {
 	function rearmement_bouclier() {			//rearmement du bouclier pour tout les vaisseaux non détruit
 		for (var i = 0; i < total_attak_tour; i++)		//vaisseaux attaquant
 			{
-				aa[i][2] = aa[i][4];
+				attaquant_tour[i][2] = attaquant_tour[i][4];
 			}
 		for (var i = 0; i < total_def_tour; i++)		//vaisseaux defenseur
 			{
-				aa[i][2] = aa[i][4];
+				defenseur_tour[i][2] = defenseur_tour[i][4];
 			}
 	}
 	

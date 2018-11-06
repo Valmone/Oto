@@ -353,8 +353,7 @@ function simulation() {
 				else {}
 		        				
 		}
-		console.log(rnd, RF);
-		
+		//console.log(rnd, RF);		
 	}
 
 	function del_vaisso_detruit() {				//suppression des vaisseaux detruit
@@ -387,11 +386,11 @@ function simulation() {
 	function rearmement_bouclier() {			//rearmement du bouclier pour tout les vaisseaux non détruit
 		for (var i = 0; i < total_attak_tour; i++)		//vaisseaux attaquant
 			{
-				aa[i][2] = aa[i][4];
+				attaquant_tour[i][2] = attaquant_tour[i][4];
 			}
 		for (var i = 0; i < total_def_tour; i++)		//vaisseaux defenseur
 			{
-				aa[i][2] = aa[i][4];
+				defenseur_tour[i][2] = defenseur_tour[i][4];
 			}
 	}
 	
@@ -509,6 +508,7 @@ function simulation() {
 
 		do {			//les 6 tours maximums
 			tours++;
+			console.log("attaquant");
 			for (var id_VaisseauTireur = 0; id_VaisseauTireur < total_attak_tour; id_VaisseauTireur++)		//c'est le tour de l'attaquant
 				{
 					rapidfire = false;
@@ -525,6 +525,7 @@ function simulation() {
 					} while((rapidfire) && (nbr_rapidfire < 1000));	//en cas de rapidfire on recommence					
 				}
 
+			console.log("defenseur");
 			for (var id_VaisseauTireur = 0; id_VaisseauTireur < total_def_tour; id_VaisseauTireur++)		//c'est le tour du defenseur
 				{
 					rapidfire = false;
