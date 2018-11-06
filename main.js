@@ -134,12 +134,12 @@ function simulation() {
 					{
 						if (defenseur_tour[id_victime][3] > degat_a_venir)
 							{defenseur_tour[id_victime][3] = defenseur_tour[id_victime][3] - degat_a_venir;}
-						else {defenseur_tour[id_victime][3] = -1;total_def_tour--;}
+						else {defenseur_tour[id_victime][3] = -1;}
 					}
 				else {
 						if (attaquant_tour[id_victime][3] > degat_a_venir)
 							{attaquant_tour[id_victime][3] = attaquant_tour[id_victime][3] - degat_a_venir;}
-						else {attaquant_tour[id_victime][3] = -1;total_attak_tour--;}
+						else {attaquant_tour[id_victime][3] = -1;}
 				}
 			}
 		else {}
@@ -151,7 +151,7 @@ function simulation() {
 				if ((defenseur_tour[id][3] *10) < (defenseur_tour[id][4] *7))
 					{
 						if (Math.floor(Math.random() * defenseur_tour[id][4]) > defenseur_tour[id][3])
-							{defenseur_tour[id][3] = -1;total_def_tour--;}
+							{defenseur_tour[id][3] = -1;}
 						else {}
 					}
 			}
@@ -159,7 +159,7 @@ function simulation() {
 				if ((attaquant_tour[id][3] *10) < (attaquant_tour[id][4] *7))
 					{
 						if (Math.floor(Math.random() * attaquant_tour[id][4]) > attaquant_tour[id][3])
-							{attaquant_tour[id][3] = -1;total_attak_tour--;}
+							{attaquant_tour[id][3] = -1;}
 						else {}
 					}
 		}
@@ -195,6 +195,44 @@ function simulation() {
 		console.log(rnd, RF);
 		
 	}
+
+	function del_vaisso_detruit() {				//suppression des vaisseaux detruit
+		for (var i = 0; i < total_attak_tour; i++)		//vaisseaux attaquant
+			{
+				if (attaquant_tour[i][3] === -1)
+					{
+						for (o = i; o < (total_attak_tour-1); o++)
+							{
+								attaquant_tour[o] = attaquant_tour[o+1];
+							}
+						total_attak_tour--;
+					}
+				else {}
+			}
+		for (var i = 0; i < total_def_tour; i++)		//vaisseaux defenseur
+			{
+				if (defenseur_tour[i][3] === -1)
+					{
+						for (o = i; o < (total_def_tour-1); o++)
+							{
+								defenseur_tour[o] = defenseur_tour[o+1];
+							}
+						total_def_tour--;
+					}
+				else {}
+			}
+	}
+
+	function rearmement_bouclier() {			//rearmement du bouclier pour tout les vaisseaux non détruit
+		for (var i = 0; i < total_attak_tour; i++)		//vaisseaux attaquant
+			{
+				aa[i][2] = aa[i][4];
+			}
+		for (var i = 0; i < total_def_tour; i++)		//vaisseaux defenseur
+			{
+				aa[i][2] = aa[i][4];
+			}
+	}
 	
 	//-------------------------------------------------------------------------//
 	//-------------------------------------------------------------------------//
@@ -222,9 +260,9 @@ function simulation() {
 		rip = verif(document.getElementById('ship_a_12_b').value),
 		traq = verif(document.getElementById('ship_a_13_b').value),
 
-		tech_arme = 11,
-		tech_bouclier = 11,
-		tech_protection = 15;
+		tech_arme = 10,
+		tech_bouclier = 10,
+		tech_protection = 10;
 
 	tablo(parseInt(pt), 0, (tech_arme*0.5 +5), (tech_bouclier*1 +10), (tech_protection*400 + 4000), "attaquant");							//pt
 	tablo(parseInt(gt), 1, (tech_arme*0.5 +5), (tech_bouclier*2.5 +25), (tech_protection*1200 +12000), "attaquant");						//gt
@@ -266,9 +304,9 @@ function simulation() {
 		rip = verif(document.getElementById('ship_d_12_b').value),
 		traq = verif(document.getElementById('ship_d_13_b').value),
 
-		tech_arme = 11,
-		tech_bouclier = 11,
-		tech_protection = 15;
+		tech_arme = 10,
+		tech_bouclier = 10,
+		tech_protection = 10;
 
 	tablo(parseInt(pt), 0, (tech_arme*0.5 +5), (tech_bouclier*1 +10), (tech_protection*400 + 4000), "defenseur");							//pt
 	tablo(parseInt(gt), 1, (tech_arme*0.5 +5), (tech_bouclier*2.5 +25), (tech_protection*1200 +12000), "defenseur");						//gt
@@ -323,13 +361,27 @@ function simulation() {
 								rapidfire_ou_pas(id_VaisseauTireur, id_VaisseauCible, "attaquant");
 							}
 						else {}
-					} while((rapidfire) && (nbr_rapidfire < 100));	//en cas de rapidfire on recommence
-					console.log(tours);
-					
+					} while((rapidfire) && (nbr_rapidfire < 1000));	//en cas de rapidfire on recommence					
 				}
 
+			for (var id_VaisseauTireur = 0; id_VaisseauTireur < total_def_tour; id_VaisseauTireur++)		//c'est le tour du defenseur
+				{
+					rapidfire = false;
+					do {
 
+						if (total_def_tour > 0)
+							{
+								var id_VaisseauCible = Math.floor(Math.random() * (total_attak_tour)); 			// selection de la cible aléatoire
+								destruction_bouclier(id_VaisseauTireur, id_VaisseauCible, "defenseur");
+								degat_a_faire(id_VaisseauTireur, id_VaisseauCible, "defenseur");
+								rapidfire_ou_pas(id_VaisseauTireur, id_VaisseauCible, "defenseur");
+							}
+						else {}
+					} while((rapidfire) && (nbr_rapidfire < 1000));	//en cas de rapidfire on recommence					
+				}
 
+			del_vaisso_detruit();
+			rearmement_bouclier();
 
 				
 				if ((tours < 6) && (total_attak_tour > 0) && (total_def_tour > 0))
