@@ -17,6 +17,12 @@ function simulation() {
 		rapidfire = false,
 		nbr_rapidfire = 0,
 
+		aflotte_reel = new Array(),
+		acompteur_flotte_reel = 0,
+
+		bflotte_reel = new Array(),
+		bcompteur_flotte_reel = 0,
+
 		RapidFire = new Array(),
 		RapidFire = [
         /*					   pt  gt cle clo cro  vb  vc  etc...
@@ -53,23 +59,17 @@ function simulation() {
 	//-------------------------------------------------------------------------//
 	//--------------------------------Fonctions--------------------------------//
 	//-------------------------------------------------------------------------//
-	/*function result_final() {
-		var attaquant_result = new Array(),
-			defenseur_result = new Array();
-		if ((total_attak_tour === 0) && (attaquant_tour[0] === undefined))
-			{var result = "attaquant_tout_perdu";}
-		else {
-				for (var i = 0; i < total_attak_tour; i++) {
-					
-				}
-		}
-		
+	function result_final() {
+		for (var i = 0; i < acompteur_flotte_reel; i++)
+			{
+				//document.getElementById("ship_a_"+aflotte_reel[i][0]+"_e").value = aflotte_reel[i][1];
+			}
 
-		if ((total_def_tour === 0) && (defenseur_tour[0] === undefined))
-			{var result = "defenseur_tout_perdu";}
-		else {}
-
-	}*/
+		for (var i = 0; i < bcompteur_flotte_reel; i++)
+			{
+				//document.getElementById("ship_a_"+bflotte_reel[i][0]+"_e").value = bflotte_reel[i][1];
+			}
+	}
 
 
 	function verif(result) {		//on vérifie les champs vide du simulateur
@@ -96,6 +96,10 @@ function simulation() {
 						attaquant[i][5] = protection;		//protection => valeur initial
 					}
 				total_attak = total_attak + fleet;
+				aflotte_reel[acompteur_flotte_reel] = new Array();
+				aflotte_reel[acompteur_flotte_reel][0] = type;
+				aflotte_reel[acompteur_flotte_reel][1] = fleet;
+				acompteur_flotte_reel++;
 			}
 		else if (attaquant_ou_pas === "defenseur")
 			{
@@ -110,6 +114,10 @@ function simulation() {
 						defenseur[i][5] = protection;		//protection => valeur initial
 					}
 				total_def = total_def + fleet;
+				bflotte_reel[bcompteur_flotte_reel] = new Array();
+				bflotte_reel[bcompteur_flotte_reel][0] = type;
+				bflotte_reel[bcompteur_flotte_reel][1] = fleet;
+				bcompteur_flotte_reel++;
 			}
 		else {}		
 	}
@@ -222,10 +230,18 @@ function simulation() {
 	}
 
 	function del_vaisso_detruit() {				//suppression des vaisseaux detruit
+		//console.log(attaquant_tour[0][0], aflotte_reel[0][0]);
+		//console.log(defenseur_tour[0][0], bflotte_reel[0][0]);
 		for (var i = 0; i < total_attak_tour; i++)		//vaisseaux attaquant
 			{
 				if (attaquant_tour[i][3] === -1)
 					{
+						for (var o = 0; o < acompteur_flotte_reel; o++)
+							{
+								if (attaquant_tour[i][0] === aflotte_reel[o][0])
+									{aflotte_reel[o][1]--;}
+								else {}
+							}
 						attaquant_tour.splice(i, 1);
 						total_attak_tour--;
 					}
@@ -235,6 +251,12 @@ function simulation() {
 			{
 				if (defenseur_tour[i][3] === -1)
 					{
+						for (var o = 0; o < bcompteur_flotte_reel; o++)
+							{
+								if (defenseur_tour[i][0] === bflotte_reel[o][0])
+									{bflotte_reel[o][1]--;}
+								else {}
+							}
 						defenseur_tour.splice(i, 1);
 						total_def_tour--;
 					}
@@ -342,8 +364,7 @@ function simulation() {
 	tablo(parseInt(rip), 12, (tech_arme*20000 +200000), (tech_bouclier*5000 +50000), (tech_protection*900000 +9000000), "defenseur");		//rip
 	tablo(parseInt(traq), 13, (tech_arme*70 +700), (tech_bouclier*40 +400), (tech_protection*7000 +70000), "defenseur");					//traq
 	//console.log(defenseur);
-	//console.log(defenseur[0][1], defenseur[0][2], defenseur[0][3], defenseur[0][4]);
-	//console.log(attaquant[0][1], attaquant[0][2], attaquant[0][3], attaquant[0][4]);
+	//console.log(bflotte_reel);
 	//-------------------------------------------------------------------------//
 	//-------------------------------------------------------------------------//
 	//-------------------------------------------------------------------------//
@@ -364,7 +385,7 @@ function simulation() {
 		defenseur_tour = defenseur;
 		total_attak_tour = total_attak;
 		total_def_tour = total_def;
-console.log(attaquant_tour);
+//console.log(aflotte_reel, bflotte_reel);
 		do {			//les 6 tours maximums
 			tours++;
 			console.log("attaquant");
@@ -414,7 +435,7 @@ console.log(attaquant_tour);
 		} while(continu);
 		nbr_simulation++;
 	//} while(nbr_simulation < 10);
-
+	result_final();
 	console.log("Nombre de tours: "+tours+"\n"+ total_attak_tour, total_def_tour);
 	//console.log(attaquant_tour, defenseur_tour);
 
