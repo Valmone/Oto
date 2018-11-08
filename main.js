@@ -19,9 +19,13 @@ function simulation() {
 
 		aflotte_reel = new Array(),
 		acompteur_flotte_reel = 0,
-
 		bflotte_reel = new Array(),
 		bcompteur_flotte_reel = 0,
+
+		aflotte_moyenne = new Array(),
+		acompteur_flotte_moyenne = 0,
+		bflotte_moyenne = new Array(),
+		bcompteur_flotte_moyenne = 0,
 
 		RapidFire = new Array(),
 		RapidFire = [
@@ -61,29 +65,30 @@ function simulation() {
 	//-------------------------------------------------------------------------//
 	function result_final(tour) {
 		document.getElementById("nbr_tour").innerText = "Nombre de tours: "+tour;
-		console.log(aflotte_reel, bflotte_reel);
-		for (var i = 0; i < acompteur_flotte_reel; i++)
+		
+		for (var i = 0; i < 13; i++)
 			{
 				if ((aflotte_reel[i][1] >= 0))
 					{document.getElementById("ship_a_"+aflotte_reel[i][0]+"_e").innerText = aflotte_reel[i][1];}
 				else {document.getElementById("ship_a_"+aflotte_reel[i][0]+"_e").innerText = "";}
 			}
-		if (acompteur_flotte_reel <= 0)
-			{
-				document.getElementById("qui_gagne").innerText = "Defenseur Gagne a 100%";
-			}
-		else if (bcompteur_flotte_reel <= 0)
-			{
-				document.getElementById("qui_gagne").innerText = "Attaquant Gagne a 100%";
-			}
-		else {document.getElementById("qui_gagne").innerText = "Egalite";}
 
-		for (var i = 0; i < bcompteur_flotte_reel; i++)
+		for (var i = 0; i < 14; i++)
 			{
 				if (bflotte_reel[i][1] >= 0)
 					{document.getElementById("ship_d_"+bflotte_reel[i][0]+"_e").innerText = bflotte_reel[i][1];}
 				else {document.getElementById("ship_d_"+bflotte_reel[i][0]+"_e").innerText = "";}
 			}
+
+		if (total_attak_tour <= 0)
+			{
+				document.getElementById("qui_gagne").innerText = "Defenseur Gagne a 100%";
+			}
+		else if (total_def_tour <= 0)
+			{
+				document.getElementById("qui_gagne").innerText = "Attaquant Gagne a 100%";
+			}
+		else {document.getElementById("qui_gagne").innerText = "Egalite";}
 	}
 
 	function result_moyenne() {
@@ -118,7 +123,7 @@ function simulation() {
 				aflotte_reel[acompteur_flotte_reel] = new Array();
 				aflotte_reel[acompteur_flotte_reel][0] = type;
 				aflotte_reel[acompteur_flotte_reel][1] = fleet;
-				acompteur_flotte_reel++;
+				acompteur_flotte_reel++;			
 			}
 		else if (attaquant_ou_pas === "defenseur")
 			{
@@ -136,7 +141,7 @@ function simulation() {
 				bflotte_reel[bcompteur_flotte_reel] = new Array();
 				bflotte_reel[bcompteur_flotte_reel][0] = type;
 				bflotte_reel[bcompteur_flotte_reel][1] = fleet;
-				bcompteur_flotte_reel++;
+				bcompteur_flotte_reel++;	
 			}
 		else {}		
 	}
@@ -201,10 +206,11 @@ function simulation() {
 				pourcent_endommagement_coque = pourcent_endommagement_coque /defenseur_tour[id][5];
 				if (defenseur_tour[id][3] < protection_70pourcent)
 					{
-						if (Math.floor(Math.random() *100) < pourcent_endommagement_coque)
+						var ale = Math.floor(Math.random() *100);
+						if (ale < pourcent_endommagement_coque)
 							{defenseur_tour[id][3] = -1;}
-						else {}
-					}
+						else {}					}
+				else {}
 			}
 		else {
 				var protection_70pourcent = attaquant_tour[id][5] *0.7,
@@ -212,10 +218,12 @@ function simulation() {
 				pourcent_endommagement_coque = pourcent_endommagement_coque /attaquant_tour[id][5];
 				if (attaquant_tour[id][3] < protection_70pourcent)
 					{
-						if (Math.floor(Math.random() *100) < pourcent_endommagement_coque)
+						var ale = Math.floor(Math.random() *100);
+						if (ale < pourcent_endommagement_coque)
 							{attaquant_tour[id][3] = -1;}
 						else {}
 					}
+				else {}
 		}
 	}
 
@@ -232,7 +240,8 @@ function simulation() {
 					        {rapidfire = true;}
 					    else {rapidfire = false;}
 		        	}
-		        else {}			
+		        else {}		
+				//console.log(rnd, RF);	
 			}
 		else {
 				var RF = RapidFire[defenseur_tour[id_victimiseur][0]][attaquant_tour[id_victime][0]]; // rf defenseur vs attaquant
@@ -244,7 +253,7 @@ function simulation() {
 					    else {rapidfire = false;}
 					}
 				else {}
-		        				
+				//console.log(rnd, RF);
 		}
 	}
 
@@ -255,12 +264,7 @@ function simulation() {
 			{
 				if (attaquant_tour[i][3] === -1)
 					{
-						for (var o = 0; o < acompteur_flotte_reel; o++)
-							{
-								if (attaquant_tour[i][0] === aflotte_reel[o][0])
-									{aflotte_reel[o][1]--;acompteur_flotte_reel--;}
-								else {}
-							}
+						aflotte_reel[attaquant_tour[i][0]][1]--;acompteur_flotte_reel--;
 						attaquant_tour.splice(i, 1);
 						total_attak_tour--;
 					}
@@ -270,12 +274,7 @@ function simulation() {
 			{
 				if (defenseur_tour[i][3] === -1)
 					{
-						for (var o = 0; o < bcompteur_flotte_reel; o++)
-							{
-								if (defenseur_tour[i][0] === bflotte_reel[o][0])
-									{bflotte_reel[o][1]--;bcompteur_flotte_reel--;}
-								else {}
-							}
+						bflotte_reel[defenseur_tour[i][0]][1]--;bcompteur_flotte_reel--;
 						defenseur_tour.splice(i, 1);
 						total_def_tour--;
 					}
@@ -403,10 +402,9 @@ function simulation() {
 		defenseur_tour = defenseur;
 		total_attak_tour = total_attak;
 		total_def_tour = total_def;
-//console.log(aflotte_reel, bflotte_reel);
+
 		do {			//les 6 tours maximums
-			tours++;
-			//console.log("attaquant");
+			console.log("attaquant");
 			for (var id_VaisseauTireur = 0; id_VaisseauTireur < total_attak_tour; id_VaisseauTireur++)		//c'est le tour de l'attaquant
 				{
 					rapidfire = false;
@@ -424,7 +422,7 @@ function simulation() {
 					} while((rapidfire) && (nbr_rapidfire < 1000));	//en cas de rapidfire on recommence					
 				}
 
-			//console.log("defenseur");
+			console.log("defenseur");
 			for (var id_VaisseauTireur = 0; id_VaisseauTireur < total_def_tour; id_VaisseauTireur++)		//c'est le tour du defenseur
 				{
 					rapidfire = false;
@@ -444,7 +442,8 @@ function simulation() {
 
 			del_vaisso_detruit();
 			rearmement_bouclier();
-				
+			
+			tours++;
 			if ((tours < 6) && (total_attak_tour > 0) && (total_def_tour > 0))
 				{var continu = true;}
 			else {var continu = false;}
