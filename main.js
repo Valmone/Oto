@@ -22,10 +22,10 @@ function simulation() {
 		bflotte_reel = new Array(),
 		bcompteur_flotte_reel = 0,
 
-		aflotte_moyenne = new Array(),
-		acompteur_flotte_moyenne = 0,
-		bflotte_moyenne = new Array(),
-		bcompteur_flotte_moyenne = 0,
+		result_moyenne_flotte = new Array(),
+		aresult_moyenne_flotte = new Array(),
+		marre_de_rajouter_des_variables = 0,
+		bresult_moyenne_flotte = new Array(),
 
 		RapidFire = new Array(),
 		RapidFire = [
@@ -53,6 +53,13 @@ function simulation() {
         /*               PB   [-1, -1, -1, -1, -1, -1, -1, -1, 80, 80, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
         /*               GB   [-1, -1, -1, -1, -1, -1, -1, -1, 80, 80, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]*/
 ];
+
+	for (var i = 0; i < 15; i++)
+		{
+			result_moyenne_flotte[i] = new Array();
+			aresult_moyenne_flotte[i] = new Array();
+			bresult_moyenne_flotte[i] = new Array();
+		}
 	//---------------------------------//
 	//---------------------------------//
 	//---------------------------------//
@@ -63,38 +70,221 @@ function simulation() {
 	//-------------------------------------------------------------------------//
 	//--------------------------------Fonctions--------------------------------//
 	//-------------------------------------------------------------------------//
-	function result_final(tour) {
-		document.getElementById("nbr_tour").innerText = "Nombre de tours: "+tour;
+	function extraction_donnes() {
+		total_attak = 0;
+		total_def = 0;
+
+		total_attak_tour = 0;
+		total_def_tour = 0;
+
+		degat_a_venir=0;
+		rapidfire = false;
+		nbr_rapidfire = 0;
+
+		acompteur_flotte_reel = 0;
+		bcompteur_flotte_reel = 0;
+
+		function tablo(fleet, type, degat, bouclier, protection, attaquant_ou_pas) {	//on créer les flottes	
+			if (attaquant_ou_pas === "attaquant")
+				{
+					for (var i = total_attak; i < (total_attak+fleet); i++)
+						{
+							attaquant[i] = new Array();
+							attaquant[i][0] = type;				//type de vaisseau
+							attaquant[i][1] = degat;			//arme
+							attaquant[i][2] = bouclier;			//bouclier
+							attaquant[i][3] = protection;		//protection
+							attaquant[i][4] = bouclier;			//bouclier => valeur initial
+							attaquant[i][5] = protection;		//protection => valeur initial
+						}
+					total_attak = total_attak + fleet;
+					aflotte_reel[acompteur_flotte_reel] = new Array();
+					aflotte_reel[acompteur_flotte_reel][0] = type;
+					aflotte_reel[acompteur_flotte_reel][1] = fleet;
+					acompteur_flotte_reel++;			
+				}
+			else if (attaquant_ou_pas === "defenseur")
+				{
+					for (var i = total_def; i < (total_def+fleet); i++)
+						{
+							defenseur[i] = new Array();
+							defenseur[i][0] = type;				//type de vaisseau
+							defenseur[i][1] = degat;			//arme
+							defenseur[i][2] = bouclier;			//bouclier
+							defenseur[i][3] = protection;		//protection
+							defenseur[i][4] = bouclier;			//bouclier => valeur initial
+							defenseur[i][5] = protection;		//protection => valeur initial
+						}
+					total_def = total_def + fleet;
+					bflotte_reel[bcompteur_flotte_reel] = new Array();
+					bflotte_reel[bcompteur_flotte_reel][0] = type;
+					bflotte_reel[bcompteur_flotte_reel][1] = fleet;
+					bcompteur_flotte_reel++;	
+				}
+			else {}		
+		}
+
+		//-------------------------------------------------------------------------//
+		//---------------On récupère les vaisseaux de l'attaquant------------------//
+		//-------------------------------------------------------------------------//
+		var pt = verif(document.getElementById('ship_a_0_b').value),
+			gt = verif(document.getElementById('ship_a_1_b').value),
+			cle = verif(document.getElementById('ship_a_2_b').value),
+			clo = verif(document.getElementById('ship_a_3_b').value),
+			cro = verif(document.getElementById('ship_a_4_b').value),
+			vb = verif(document.getElementById('ship_a_5_b').value),
+			vc = verif(document.getElementById('ship_a_6_b').value),
+			cyclo = verif(document.getElementById('ship_a_7_b').value),
+			sonde = verif(document.getElementById('ship_a_8_b').value),
+			bb = verif(document.getElementById('ship_a_9_b').value),
+			//---
+			dd = verif(document.getElementById('ship_a_11_b').value),
+			rip = verif(document.getElementById('ship_a_12_b').value),
+			traq = verif(document.getElementById('ship_a_13_b').value),
+
+			tech_arme = 10,
+			tech_bouclier = 10,
+			tech_protection = 10;
+
+		tablo(parseInt(pt), 0, (tech_arme*0.5 +5), (tech_bouclier*1 +10), (tech_protection*400 + 4000), "attaquant");							//pt
+		tablo(parseInt(gt), 1, (tech_arme*0.5 +5), (tech_bouclier*2.5 +25), (tech_protection*1200 +12000), "attaquant");						//gt
+		tablo(parseInt(cle), 2, (tech_arme*5 +50), (tech_bouclier*1 +10), (tech_protection*400 +4000), "attaquant");							//cle
+		tablo(parseInt(clo), 3, (tech_arme*15 +150), (tech_bouclier*2.5 +25), (tech_protection*1000 +10000), "attaquant");						//clo
+		tablo(parseInt(cro), 4, (tech_arme*40 +400), (tech_bouclier*5 +50), (tech_protection*2700 +27000), "attaquant");						//cro
+		tablo(parseInt(vb), 5, (tech_arme*10 +1000), (tech_bouclier*20 +200), (tech_protection*6000 +60000), "attaquant");						//vb
+		tablo(parseInt(vc), 6, (tech_arme*5 +50), (tech_bouclier*10 +100), (tech_protection*3000 +30000), "attaquant");							//vc
+		tablo(parseInt(cyclo), 7, (tech_arme*0.1 +1), (tech_bouclier*1 +10), (tech_protection*6000 +16000), "attaquant");						//cycmp
+		tablo(parseInt(sonde), 8, (tech_arme*0 +0), (tech_bouclier*0 +0), (tech_protection*100 +1000), "attaquant");							//sonde
+		tablo(parseInt(bb), 9, (tech_arme*100 +1000), (tech_bouclier*50 +500), (tech_protection*7500 +75000), "attaquant");						//bb
+		tablo(parseInt(0), 10, (tech_arme*0.1 +1), (tech_bouclier*0.1 +1), (tech_protection*200 +2000), "attaquant");							//sat
+		tablo(parseInt(dd), 11, (tech_arme*200 +2000), (tech_bouclier*50 +500), (tech_protection*11000 +110000), "attaquant");					//dd
+		tablo(parseInt(rip), 12, (tech_arme*20000 +200000), (tech_bouclier*5000 +50000), (tech_protection*900000 +9000000), "attaquant");		//rip
+		tablo(parseInt(traq), 13, (tech_arme*70 +700), (tech_bouclier*40 +400), (tech_protection*7000 +70000), "attaquant");					//traq
+		//console.log(attaquant);
+		//-------------------------------------------------------------------------//
+		//-------------------------------------------------------------------------//
+		//-------------------------------------------------------------------------//
+
 		
-		for (var i = 0; i < 13; i++)
+
+
+		//-----------------------------------------------------------------------//
+		//---------------On récupère les vaisseaux du defenseur------------------//
+		//-----------------------------------------------------------------------//
+		var pt = verif(document.getElementById('ship_d_0_b').value),
+			gt = verif(document.getElementById('ship_d_1_b').value),
+			cle = verif(document.getElementById('ship_d_2_b').value),
+			clo = verif(document.getElementById('ship_d_3_b').value),
+			cro = verif(document.getElementById('ship_d_4_b').value),
+			vb = verif(document.getElementById('ship_d_5_b').value),
+			vc = verif(document.getElementById('ship_d_6_b').value),
+			cyclo = verif(document.getElementById('ship_d_7_b').value),
+			sonde = verif(document.getElementById('ship_d_8_b').value),
+			bb = verif(document.getElementById('ship_d_9_b').value),
+			sat = verif(document.getElementById('ship_d_10_b').value),
+			dd = verif(document.getElementById('ship_d_11_b').value),
+			rip = verif(document.getElementById('ship_d_12_b').value),
+			traq = verif(document.getElementById('ship_d_13_b').value),
+
+			tech_arme = 10,
+			tech_bouclier = 10,
+			tech_protection = 10;
+
+		tablo(parseInt(pt), 0, (tech_arme*0.5 +5), (tech_bouclier*1 +10), (tech_protection*400 + 4000), "defenseur");							//pt
+		tablo(parseInt(gt), 1, (tech_arme*0.5 +5), (tech_bouclier*2.5 +25), (tech_protection*1200 +12000), "defenseur");						//gt
+		tablo(parseInt(cle), 2, (tech_arme*5 +50), (tech_bouclier*1 +10), (tech_protection*400 +4000), "defenseur");							//cle
+		tablo(parseInt(clo), 3, (tech_arme*15 +150), (tech_bouclier*2.5 +25), (tech_protection*1000 +10000), "defenseur");						//clo
+		tablo(parseInt(cro), 4, (tech_arme*40 +400), (tech_bouclier*5 +50), (tech_protection*2700 +27000), "defenseur");						//cro
+		tablo(parseInt(vb), 5, (tech_arme*10 +1000), (tech_bouclier*20 +200), (tech_protection*6000 +60000), "defenseur");						//vb
+		tablo(parseInt(vc), 6, (tech_arme*5 +50), (tech_bouclier*10 +100), (tech_protection*3000 +30000), "defenseur");							//vc
+		tablo(parseInt(cyclo), 7, (tech_arme*0.1 +1), (tech_bouclier*1 +10), (tech_protection*6000 +16000), "defenseur");						//cycmp
+		tablo(parseInt(sonde), 8, (tech_arme*0 +0), (tech_bouclier*0 +0), (tech_protection*100 +1000), "defenseur");							//sonde
+		tablo(parseInt(bb), 9, (tech_arme*100 +1000), (tech_bouclier*50 +500), (tech_protection*7500 +75000), "defenseur");						//bb
+		tablo(parseInt(sat), 10, (tech_arme*0.1 +1), (tech_bouclier*0.1 +1), (tech_protection*200 +2000), "defenseur");							//sat
+		tablo(parseInt(dd), 11, (tech_arme*200 +2000), (tech_bouclier*50 +500), (tech_protection*11000 +110000), "defenseur");					//dd
+		tablo(parseInt(rip), 12, (tech_arme*20000 +200000), (tech_bouclier*5000 +50000), (tech_protection*900000 +9000000), "defenseur");		//rip
+		tablo(parseInt(traq), 13, (tech_arme*70 +700), (tech_bouclier*40 +400), (tech_protection*7000 +70000), "defenseur");					//traq
+		//console.log(defenseur);
+		//-------------------------------------------------------------------------//
+		//-------------------------------------------------------------------------//
+		//-------------------------------------------------------------------------//
+	}
+
+	function result_final(tour) {		//affichage du resultat
+		console.log(aresult_moyenne_flotte);
+		for (var o = 0; o < 14; o++)
 			{
-				if ((aflotte_reel[i][1] >= 0))
-					{document.getElementById("ship_a_"+aflotte_reel[i][0]+"_e").innerText = aflotte_reel[i][1];}
-				else {document.getElementById("ship_a_"+aflotte_reel[i][0]+"_e").innerText = "";}
+				var moyenne = 0;
+				for (var i = 0; i < 10; i++)
+					{
+						moyenne = parseInt(aresult_moyenne_flotte[o][i]) + parseInt(moyenne);
+					}
+				aresult_moyenne_flotte[o][11] = (moyenne/10);
+			}
+		for (var o = 0; o < 14; o++)
+			{
+				var moyenne = 0;
+				for (var i = 0; i < 10; i++)
+					{
+						moyenne = parseInt(bresult_moyenne_flotte[o][i]) + parseInt(moyenne);
+					}
+				bresult_moyenne_flotte[o][11] = (moyenne/10);
+			}
+		for (var o = 0; o < 3; o++)
+			{
+				var moyenne = 0;
+				for (var i = 0; i < 10; i++)
+					{
+						moyenne = parseInt(result_moyenne_flotte[i][o]) + parseInt(moyenne);
+					}
+				result_moyenne_flotte[11][o] = (moyenne/10);
+			}
+
+		document.getElementById("nbr_tour").innerText = "Nombre de tours: ~"+result_moyenne_flotte[11][0];//tour;
+		for (var i = 0; i < 14; i++)
+			{
+				if (i !== 10)
+					{
+						if ((aresult_moyenne_flotte[i][11] >= 0))
+							{document.getElementById("ship_a_"+aflotte_reel[i][0]+"_e").innerText = aresult_moyenne_flotte[i][11];}
+						else {document.getElementById("ship_a_"+aflotte_reel[i][0]+"_e").innerText = "";}
+					}
+				else {}				
 			}
 
 		for (var i = 0; i < 14; i++)
 			{
-				if (bflotte_reel[i][1] >= 0)
-					{document.getElementById("ship_d_"+bflotte_reel[i][0]+"_e").innerText = bflotte_reel[i][1];}
+				if (bresult_moyenne_flotte[i][11] >= 0)
+					{document.getElementById("ship_d_"+bflotte_reel[i][0]+"_e").innerText = bresult_moyenne_flotte[i][11];}
 				else {document.getElementById("ship_d_"+bflotte_reel[i][0]+"_e").innerText = "";}
 			}
 
-		if (total_attak_tour <= 0)
+		if (result_moyenne_flotte[11][1] <= 0)
 			{
 				document.getElementById("qui_gagne").innerText = "Defenseur Gagne a 100%";
 			}
-		else if (total_def_tour <= 0)
+		else if (result_moyenne_flotte[11][2] <= 0)
 			{
 				document.getElementById("qui_gagne").innerText = "Attaquant Gagne a 100%";
 			}
 		else {document.getElementById("qui_gagne").innerText = "Egalite";}
 	}
 
-	function result_moyenne() {
+	function result_moyenne(o) {			//on rentre les resultats de chaques tours
+		for (var i = 0; i < 14; i++)
+			{
+				aresult_moyenne_flotte[i][marre_de_rajouter_des_variables] = aflotte_reel[i][1];
+			}
 
+		for (var i = 0; i < 14; i++)
+			{
+				bresult_moyenne_flotte[i][marre_de_rajouter_des_variables] = bflotte_reel[i][1];
+			}
+		result_moyenne_flotte[o][0] = tours;
+		result_moyenne_flotte[o][1] = total_attak_tour;
+		result_moyenne_flotte[o][2] = total_def_tour;
+		marre_de_rajouter_des_variables++;
 	}
-
 
 	function verif(result) {		//on vérifie les champs vide du simulateur
 		if (result === "")
@@ -104,46 +294,6 @@ function simulation() {
 		else {var value = result;}
 		
 		return value;
-	}
-
-	function tablo(fleet, type, degat, bouclier, protection, attaquant_ou_pas) {	//on créer les flottes	
-		if (attaquant_ou_pas === "attaquant")
-			{
-				for (var i = total_attak; i < (total_attak+fleet); i++)
-					{
-						attaquant[i] = new Array();
-						attaquant[i][0] = type;				//type de vaisseau
-						attaquant[i][1] = degat;			//arme
-						attaquant[i][2] = bouclier;			//bouclier
-						attaquant[i][3] = protection;		//protection
-						attaquant[i][4] = bouclier;			//bouclier => valeur initial
-						attaquant[i][5] = protection;		//protection => valeur initial
-					}
-				total_attak = total_attak + fleet;
-				aflotte_reel[acompteur_flotte_reel] = new Array();
-				aflotte_reel[acompteur_flotte_reel][0] = type;
-				aflotte_reel[acompteur_flotte_reel][1] = fleet;
-				acompteur_flotte_reel++;			
-			}
-		else if (attaquant_ou_pas === "defenseur")
-			{
-				for (var i = total_def; i < (total_def+fleet); i++)
-					{
-						defenseur[i] = new Array();
-						defenseur[i][0] = type;				//type de vaisseau
-						defenseur[i][1] = degat;			//arme
-						defenseur[i][2] = bouclier;			//bouclier
-						defenseur[i][3] = protection;		//protection
-						defenseur[i][4] = bouclier;			//bouclier => valeur initial
-						defenseur[i][5] = protection;		//protection => valeur initial
-					}
-				total_def = total_def + fleet;
-				bflotte_reel[bcompteur_flotte_reel] = new Array();
-				bflotte_reel[bcompteur_flotte_reel][0] = type;
-				bflotte_reel[bcompteur_flotte_reel][1] = fleet;
-				bcompteur_flotte_reel++;	
-			}
-		else {}		
 	}
 
 	function destruction_bouclier(id_victimiseur, id_victime, a_qui_le_tour) {
@@ -298,113 +448,24 @@ function simulation() {
 	//-------------------------------------------------------------------------//
 
 
-
-
-
-	//-------------------------------------------------------------------------//
-	//---------------On récupère les vaisseaux de l'attaquant------------------//
-	//-------------------------------------------------------------------------//
-	var pt = verif(document.getElementById('ship_a_0_b').value),
-		gt = verif(document.getElementById('ship_a_1_b').value),
-		cle = verif(document.getElementById('ship_a_2_b').value),
-		clo = verif(document.getElementById('ship_a_3_b').value),
-		cro = verif(document.getElementById('ship_a_4_b').value),
-		vb = verif(document.getElementById('ship_a_5_b').value),
-		vc = verif(document.getElementById('ship_a_6_b').value),
-		cyclo = verif(document.getElementById('ship_a_7_b').value),
-		sonde = verif(document.getElementById('ship_a_8_b').value),
-		bb = verif(document.getElementById('ship_a_9_b').value),
-		//---
-		dd = verif(document.getElementById('ship_a_11_b').value),
-		rip = verif(document.getElementById('ship_a_12_b').value),
-		traq = verif(document.getElementById('ship_a_13_b').value),
-
-		tech_arme = 10,
-		tech_bouclier = 10,
-		tech_protection = 10;
-
-	tablo(parseInt(pt), 0, (tech_arme*0.5 +5), (tech_bouclier*1 +10), (tech_protection*400 + 4000), "attaquant");							//pt
-	tablo(parseInt(gt), 1, (tech_arme*0.5 +5), (tech_bouclier*2.5 +25), (tech_protection*1200 +12000), "attaquant");						//gt
-	tablo(parseInt(cle), 2, (tech_arme*5 +50), (tech_bouclier*1 +10), (tech_protection*400 +4000), "attaquant");							//cle
-	tablo(parseInt(clo), 3, (tech_arme*15 +150), (tech_bouclier*2.5 +25), (tech_protection*1000 +10000), "attaquant");						//clo
-	tablo(parseInt(cro), 4, (tech_arme*40 +400), (tech_bouclier*5 +50), (tech_protection*2700 +27000), "attaquant");						//cro
-	tablo(parseInt(vb), 5, (tech_arme*10 +1000), (tech_bouclier*20 +200), (tech_protection*6000 +60000), "attaquant");						//vb
-	tablo(parseInt(vc), 6, (tech_arme*5 +50), (tech_bouclier*10 +100), (tech_protection*3000 +30000), "attaquant");							//vc
-	tablo(parseInt(cyclo), 7, (tech_arme*0.1 +1), (tech_bouclier*1 +10), (tech_protection*6000 +16000), "attaquant");						//cycmp
-	tablo(parseInt(sonde), 8, (tech_arme*0 +0), (tech_bouclier*0 +0), (tech_protection*100 +1000), "attaquant");							//sonde
-	tablo(parseInt(bb), 9, (tech_arme*100 +1000), (tech_bouclier*50 +500), (tech_protection*7500 +75000), "attaquant");						//bb
-
-	tablo(parseInt(dd), 11, (tech_arme*200 +2000), (tech_bouclier*50 +500), (tech_protection*11000 +110000), "attaquant");					//dd
-	tablo(parseInt(rip), 12, (tech_arme*20000 +200000), (tech_bouclier*5000 +50000), (tech_protection*900000 +9000000), "attaquant");		//rip
-	tablo(parseInt(traq), 13, (tech_arme*70 +700), (tech_bouclier*40 +400), (tech_protection*7000 +70000), "attaquant");					//traq
-	//console.log(attaquant);
-	//-------------------------------------------------------------------------//
-	//-------------------------------------------------------------------------//
-	//-------------------------------------------------------------------------//
-
 	
-
-
-	//-----------------------------------------------------------------------//
-	//---------------On récupère les vaisseaux du defenseur------------------//
-	//-----------------------------------------------------------------------//
-	var pt = verif(document.getElementById('ship_d_0_b').value),
-		gt = verif(document.getElementById('ship_d_1_b').value),
-		cle = verif(document.getElementById('ship_d_2_b').value),
-		clo = verif(document.getElementById('ship_d_3_b').value),
-		cro = verif(document.getElementById('ship_d_4_b').value),
-		vb = verif(document.getElementById('ship_d_5_b').value),
-		vc = verif(document.getElementById('ship_d_6_b').value),
-		cyclo = verif(document.getElementById('ship_d_7_b').value),
-		sonde = verif(document.getElementById('ship_d_8_b').value),
-		bb = verif(document.getElementById('ship_d_9_b').value),
-		sat = verif(document.getElementById('ship_d_10_b').value),
-		dd = verif(document.getElementById('ship_d_11_b').value),
-		rip = verif(document.getElementById('ship_d_12_b').value),
-		traq = verif(document.getElementById('ship_d_13_b').value),
-
-		tech_arme = 10,
-		tech_bouclier = 10,
-		tech_protection = 10;
-
-	tablo(parseInt(pt), 0, (tech_arme*0.5 +5), (tech_bouclier*1 +10), (tech_protection*400 + 4000), "defenseur");							//pt
-	tablo(parseInt(gt), 1, (tech_arme*0.5 +5), (tech_bouclier*2.5 +25), (tech_protection*1200 +12000), "defenseur");						//gt
-	tablo(parseInt(cle), 2, (tech_arme*5 +50), (tech_bouclier*1 +10), (tech_protection*400 +4000), "defenseur");							//cle
-	tablo(parseInt(clo), 3, (tech_arme*15 +150), (tech_bouclier*2.5 +25), (tech_protection*1000 +10000), "defenseur");						//clo
-	tablo(parseInt(cro), 4, (tech_arme*40 +400), (tech_bouclier*5 +50), (tech_protection*2700 +27000), "defenseur");						//cro
-	tablo(parseInt(vb), 5, (tech_arme*10 +1000), (tech_bouclier*20 +200), (tech_protection*6000 +60000), "defenseur");						//vb
-	tablo(parseInt(vc), 6, (tech_arme*5 +50), (tech_bouclier*10 +100), (tech_protection*3000 +30000), "defenseur");							//vc
-	tablo(parseInt(cyclo), 7, (tech_arme*0.1 +1), (tech_bouclier*1 +10), (tech_protection*6000 +16000), "defenseur");						//cycmp
-	tablo(parseInt(sonde), 8, (tech_arme*0 +0), (tech_bouclier*0 +0), (tech_protection*100 +1000), "defenseur");							//sonde
-	tablo(parseInt(bb), 9, (tech_arme*100 +1000), (tech_bouclier*50 +500), (tech_protection*7500 +75000), "defenseur");						//bb
-	tablo(parseInt(sat), 10, (tech_arme*0.1 +1), (tech_bouclier*0.1 +1), (tech_protection*200 +2000), "defenseur");							//sat
-	tablo(parseInt(dd), 11, (tech_arme*200 +2000), (tech_bouclier*50 +500), (tech_protection*11000 +110000), "defenseur");					//dd
-	tablo(parseInt(rip), 12, (tech_arme*20000 +200000), (tech_bouclier*5000 +50000), (tech_protection*900000 +9000000), "defenseur");		//rip
-	tablo(parseInt(traq), 13, (tech_arme*70 +700), (tech_bouclier*40 +400), (tech_protection*7000 +70000), "defenseur");					//traq
-	//console.log(defenseur);
-	//-------------------------------------------------------------------------//
-	//-------------------------------------------------------------------------//
-	//-------------------------------------------------------------------------//
-
-
-
 
 
 	//-----------------------------------------------------------------------//
 	//-----------------------------Simulation--------------------------------//
 	//-----------------------------------------------------------------------//
-	var tours = 0,
-		nbr_simulation = 1;
+	var nbr_simulation = 0;
 
-	//do {			//on fait plusieurs simulations pour avoir une moyenne
-
+	do {			//on fait plusieurs simulations pour avoir une moyenne
+		extraction_donnes();
 		attaquant_tour = attaquant;				//on remet à jours les flottes
 		defenseur_tour = defenseur;
 		total_attak_tour = total_attak;
 		total_def_tour = total_def;
+		var tours = 0;
 
 		do {			//les 6 tours maximums
-			console.log("attaquant");
+			//console.log("attaquant");
 			for (var id_VaisseauTireur = 0; id_VaisseauTireur < total_attak_tour; id_VaisseauTireur++)		//c'est le tour de l'attaquant
 				{
 					rapidfire = false;
@@ -413,6 +474,7 @@ function simulation() {
 						if (total_def_tour > 0)
 							{
 								var id_VaisseauCible = Math.floor(Math.random() * (total_def_tour)); 			// selection de la cible aléatoire
+								//console.log(id_VaisseauCible);
 								destruction_bouclier(id_VaisseauTireur, id_VaisseauCible, "attaquant");
 								degat_a_faire(id_VaisseauTireur, id_VaisseauCible, "attaquant");
 								rapidfire_ou_pas(id_VaisseauTireur, id_VaisseauCible, "attaquant");
@@ -422,7 +484,7 @@ function simulation() {
 					} while((rapidfire) && (nbr_rapidfire < 1000));	//en cas de rapidfire on recommence					
 				}
 
-			console.log("defenseur");
+			//console.log("defenseur");
 			for (var id_VaisseauTireur = 0; id_VaisseauTireur < total_def_tour; id_VaisseauTireur++)		//c'est le tour du defenseur
 				{
 					rapidfire = false;
@@ -450,9 +512,9 @@ function simulation() {
 
 		} while(continu);
 		
-		//result_moyenne();
+		result_moyenne(nbr_simulation);
 		nbr_simulation++;
-	//} while(nbr_simulation < 10);
+	} while(nbr_simulation < 10);
 
 	result_final(tours);
 	console.log("Nombre de tours: "+tours+"\n"+ total_attak_tour, total_def_tour);
